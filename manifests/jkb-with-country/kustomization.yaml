@@ -14,7 +14,7 @@ configMapGenerator:
 images:
 - name: ghcr.io/albertycl/jkb-with-country-backend
   newName: ghcr.io/albertycl/jkb-with-country-backend
-  newTag: 7d503468d454ce9d04f1f6874dc5758228f24b1e
+  newTag: 1d8de7365c83b10696255763f444d141a2a24bf5
 - name: ghcr.io/albertycl/jkb-with-country-frontend
   newName: ghcr.io/albertycl/jkb-with-country-frontend
-  newTag: 7d503468d454ce9d04f1f6874dc5758228f24b1e
+  newTag: 1d8de7365c83b10696255763f444d141a2a24bf5
