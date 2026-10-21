@@ -11,7 +11,7 @@ resources:
 images:
 - name: ghcr.io/albertycl/fqdn-compare-backend
   newName: ghcr.io/albertycl/fqdn-compare-backend
-  newTag: latest
+  newTag: 0a9c4f64927f6afa855231cd9100734959e54693
 - name: ghcr.io/albertycl/fqdn-compare-frontend
   newName: ghcr.io/albertycl/fqdn-compare-frontend
-  newTag: latest
+  newTag: 0a9c4f64927f6afa855231cd9100734959e54693
