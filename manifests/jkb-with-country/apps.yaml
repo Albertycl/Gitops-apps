@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/albertycl/jkb-with-country-backend
+          ports:
+            - { name: http, containerPort: 5065 }
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef: { name: jkb-db, key: database-url }
+            - { name: SEED_DEMO_DATA, value: "true" }
+            - { name: ENABLE_POLLERS, value: "false" }
+          readinessProbe:
+            httpGet: { path: /c30_get_current_time, port: http }
+            periodSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests: { cpu: 20m, memory: 128Mi }
+            limits: { memory: 384Mi }
+          volumeMounts:
+            - { name: demo, mountPath: /app/demo, readOnly: true }
+      volumes:
+        - name: demo
+          configMap: { name: jkb-seed }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector: { app: backend }
+  ports:
+    - { name: http, port: 5065, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/albertycl/jkb-with-country-frontend
+          ports:
+            - { name: http, containerPort: 80 }
+          env:
+            - { name: API_UPSTREAM, value: "http://backend:5065" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector: { app: frontend }
+  ports:
+    - { name: http, port: 80, targetPort: http }

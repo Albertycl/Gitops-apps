@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: backend
+          image: ghcr.io/albertycl/fqdn-compare-backend
+          ports:
+            - { name: http, containerPort: 5432 }
+          env:
+            - { name: DB_HOST, value: mariadb }
+            - { name: DB_PORT, value: "3306" }
+            - { name: DB_USER, value: root }
+            - { name: DB_NAME, value: fqdn_tool }
+            - { name: FQDN_DB_NAME, value: fqdn_v3 }
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: fqdn-db, key: db-password }
+          readinessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { memory: 768Mi }
+          volumeMounts:
+            - { name: data, mountPath: /data/download }
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector: { app: backend }
+  ports:
+    - { name: http, port: 5432, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: frontend
+          image: ghcr.io/albertycl/fqdn-compare-frontend
+          ports:
+            - { name: http, containerPort: 80 }
+          env:
+            - { name: BACKEND_URL, value: "http://backend:5432" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector: { app: frontend }
+  ports:
+    - { name: http, port: 80, targetPort: http }

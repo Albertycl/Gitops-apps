@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: country-availability
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Albertycl/gitops-apps.git
+    targetRevision: main
+    path: manifests/country-availability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: country-availability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

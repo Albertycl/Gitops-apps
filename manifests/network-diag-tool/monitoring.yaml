@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: network-diag
+  namespace: network-diag
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+  - name: network-diag
+    rules:
+    - alert: NetworkDiagPodNotReady
+      expr: kube_pod_status_ready{namespace="network-diag",condition="false"} == 1
+      for: 5m
+      labels: {severity: warning}
+      annotations:
+        summary: "Pod {{ $labels.pod }} has not been ready for 5 minutes"
+    - alert: NetworkDiagPodRestarting
+      expr: increase(kube_pod_container_status_restarts_total{namespace="network-diag"}[15m]) > 2
+      labels: {severity: warning}
+      annotations:
+        summary: "Container {{ $labels.container }} in {{ $labels.pod }} restarted more than 2 times in 15 minutes"
+    - alert: NetworkDiagDeploymentUnavailable
+      expr: kube_deployment_status_replicas_available{namespace="network-diag"} < kube_deployment_spec_replicas{namespace="network-diag"}
+      for: 5m
+      labels: {severity: critical}
+      annotations:
+        summary: "Deployment {{ $labels.deployment }} has fewer available replicas than desired"
+    - alert: NetworkDiagHigh5xxRate
+      expr: |
+        sum(rate(traefik_router_requests_total{router=~"network-diag-.*",code=~"5.."}[5m]))
+          / sum(rate(traefik_router_requests_total{router=~"network-diag-.*"}[5m])) > 0.05
+      for: 5m
+      labels: {severity: critical}
+      annotations:
+        summary: "More than 5% of requests to the network-diag hosts return 5xx"

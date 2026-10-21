@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netdiag-tls
+spec:
+  secretName: netdiag-tls
+  privateKey:
+    rotationPolicy: Always
+  dnsNames:
+  - admin.albertycliu.xyz
+  - diag.albertycliu.xyz
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod

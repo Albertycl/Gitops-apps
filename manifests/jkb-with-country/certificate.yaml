@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jkb-with-country-tls
+spec:
+  secretName: jkb-with-country-tls
+  privateKey:
+    rotationPolicy: Always
+  dnsNames:
+  - jkb.albertycliu.xyz
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod

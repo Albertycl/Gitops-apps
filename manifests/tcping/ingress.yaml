@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tcping
+spec:
+  entryPoints: [websecure]
+  routes:
+  - kind: Rule
+    match: Host(`tcping.albertycliu.xyz`)
+    services:
+    - name: frontend
+      port: 80
+  tls:
+    secretName: tcping-tls

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: jkb
+resources:
+- namespace.yaml
+- mariadb.yaml
+- apps.yaml
+- ingress.yaml
+- certificate.yaml
+configMapGenerator:
+- files:
+  - seed_demo_data.sql
+  name: jkb-seed
+images:
+- name: ghcr.io/albertycl/jkb-with-country-backend
+  newName: ghcr.io/albertycl/jkb-with-country-backend
+  newTag: 7d503468d454ce9d04f1f6874dc5758228f24b1e
+- name: ghcr.io/albertycl/jkb-with-country-frontend
+  newName: ghcr.io/albertycl/jkb-with-country-frontend
+  newTag: 7d503468d454ce9d04f1f6874dc5758228f24b1e

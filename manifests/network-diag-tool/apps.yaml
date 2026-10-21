@@ -1,0 +1,165 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-backend
+  namespace: network-diag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: admin-backend }
+  template:
+    metadata:
+      labels: { app: admin-backend }
+    spec:
+      containers:
+        - name: admin-backend
+          image: ghcr.io/albertycl/network-diag-tool-admin-backend
+          ports:
+            - { name: http, containerPort: 5425 }
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef: { name: netdiag-db, key: database-url }
+          readinessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-backend
+  namespace: network-diag
+spec:
+  selector: { app: admin-backend }
+  ports:
+    - { name: http, port: 5425, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-frontend
+  namespace: network-diag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: admin-frontend }
+  template:
+    metadata:
+      labels: { app: admin-frontend }
+    spec:
+      containers:
+        - name: admin-frontend
+          image: ghcr.io/albertycl/network-diag-tool-admin-frontend
+          ports:
+            - { name: http, containerPort: 80 }
+          env:
+            - { name: API_UPSTREAM, value: "http://admin-backend:5425" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-frontend
+  namespace: network-diag
+spec:
+  selector: { app: admin-frontend }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-backend
+  namespace: network-diag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: user-backend }
+  template:
+    metadata:
+      labels: { app: user-backend }
+    spec:
+      containers:
+        - name: user-backend
+          image: ghcr.io/albertycl/network-diag-tool-user-backend
+          ports:
+            - { name: http, containerPort: 5427 }
+          env:
+            - { name: DATABASE_URL, value: "sqlite:////data/network_diag_user.db" }
+            - { name: ADMIN_BACKEND_URL, value: "http://admin-backend:5425" }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          readinessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 256Mi }
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: user-data }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-backend
+  namespace: network-diag
+spec:
+  selector: { app: user-backend }
+  ports:
+    - { name: http, port: 5427, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-frontend
+  namespace: network-diag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: user-frontend }
+  template:
+    metadata:
+      labels: { app: user-frontend }
+    spec:
+      containers:
+        - name: user-frontend
+          image: ghcr.io/albertycl/network-diag-tool-user-frontend
+          ports:
+            - { name: http, containerPort: 80 }
+          env:
+            - { name: API_UPSTREAM, value: "http://user-backend:5427" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-frontend
+  namespace: network-diag
+spec:
+  selector: { app: user-frontend }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-data
+  namespace: network-diag
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: { storage: 1Gi }

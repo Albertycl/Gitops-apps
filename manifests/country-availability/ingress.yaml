@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: country-availability
+spec:
+  entryPoints: [websecure]
+  routes:
+  - kind: Rule
+    match: Host(`availability.albertycliu.xyz`)
+    services:
+    - name: frontend
+      port: 80
+  tls:
+    secretName: country-availability-tls

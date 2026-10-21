@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: outage-report
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/albertycl/outage-report-backend
+          ports:
+            - { name: http, containerPort: 5410 }
+          env:
+            - { name: APP_CONFIG, value: production }
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef: { name: outage-db, key: database-url }
+          readinessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 10
+            initialDelaySeconds: 10
+            failureThreshold: 12
+          resources:
+            requests: { cpu: 20m, memory: 96Mi }
+            limits: { memory: 384Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: outage-report
+spec:
+  selector: { app: backend }
+  ports:
+    - { name: http, port: 5410, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: outage-report
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/albertycl/outage-report-frontend
+          ports:
+            - { name: http, containerPort: 80 }
+          env:
+            - { name: API_BASE_URL, value: /backend }
+            - { name: BACKEND_UPSTREAM, value: "backend.outage-report.svc.cluster.local:5410" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { memory: 128Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: outage-report
+spec:
+  selector: { app: frontend }
+  ports:
+    - { name: http, port: 80, targetPort: http }

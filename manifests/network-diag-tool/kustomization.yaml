@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: network-diag
+resources:
+- namespace.yaml
+- mariadb.yaml
+- apps.yaml
+- ingress.yaml
+- certificate.yaml
+- monitoring.yaml
+images:
+- name: ghcr.io/albertycl/network-diag-tool-admin-backend
+  newName: ghcr.io/albertycl/network-diag-tool-admin-backend
+  newTag: bdfda7cb87800c14431ed00285b871cfc3172307
+- name: ghcr.io/albertycl/network-diag-tool-admin-frontend
+  newName: ghcr.io/albertycl/network-diag-tool-admin-frontend
+  newTag: bdfda7cb87800c14431ed00285b871cfc3172307
+- name: ghcr.io/albertycl/network-diag-tool-user-backend
+  newName: ghcr.io/albertycl/network-diag-tool-user-backend
+  newTag: bdfda7cb87800c14431ed00285b871cfc3172307
+- name: ghcr.io/albertycl/network-diag-tool-user-frontend
+  newName: ghcr.io/albertycl/network-diag-tool-user-frontend
+  newTag: bdfda7cb87800c14431ed00285b871cfc3172307

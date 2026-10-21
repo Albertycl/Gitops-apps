@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: outage-report
+resources:
+- namespace.yaml
+- mariadb.yaml
+- app.yaml
+- ingress.yaml
+- certificate.yaml
+images:
+- name: ghcr.io/albertycl/outage-report-backend
+  newName: ghcr.io/albertycl/outage-report-backend
+  newTag: 524d22d0072d5bb80f12d308d58f3d3a3fd4b347
+- name: ghcr.io/albertycl/outage-report-frontend
+  newName: ghcr.io/albertycl/outage-report-frontend
+  newTag: 524d22d0072d5bb80f12d308d58f3d3a3fd4b347

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fqdn-compare
+resources:
+- namespace.yaml
+- initdb-configmap.yaml
+- mariadb.yaml
+- app.yaml
+- ingress.yaml
+- certificate.yaml
+images:
+- name: ghcr.io/albertycl/fqdn-compare-backend
+  newName: ghcr.io/albertycl/fqdn-compare-backend
+  newTag: latest
+- name: ghcr.io/albertycl/fqdn-compare-frontend
+  newName: ghcr.io/albertycl/fqdn-compare-frontend
+  newTag: latest

@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: fqdn-compare
+spec:
+  entryPoints: [websecure]
+  routes:
+  - kind: Rule
+    match: Host(`fqdn-seachtool.albertycliu.xyz`)
+    services:
+    - name: frontend
+      port: 80
+  tls:
+    secretName: fqdn-compare-tls

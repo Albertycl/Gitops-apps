@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: country-availability
+resources:
+- namespace.yaml
+- mariadb.yaml
+- apps.yaml
+- ingress.yaml
+- certificate.yaml
+images:
+- name: ghcr.io/albertycl/country-availability-backend
+  newName: ghcr.io/albertycl/country-availability-backend
+  newTag: 0552c7fcbcf2f8ac2efe9e55725aa12358f37d85
+- name: ghcr.io/albertycl/country-availability-frontend
+  newName: ghcr.io/albertycl/country-availability-frontend
+  newTag: 0552c7fcbcf2f8ac2efe9e55725aa12358f37d85

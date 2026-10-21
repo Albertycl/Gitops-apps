@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: syslog-demo
+resources:
+- namespace.yaml
+- mariadb.yaml
+- apps.yaml
+- ingress.yaml
+- certificate.yaml
+images:
+- name: ghcr.io/albertycl/syslog-demo-backend
+  newName: ghcr.io/albertycl/syslog-demo-backend
+  newTag: 769cef8f5bc712fca8321d432f72a9831ea76eff
+- name: ghcr.io/albertycl/syslog-demo-frontend
+  newName: ghcr.io/albertycl/syslog-demo-frontend
+  newTag: 769cef8f5bc712fca8321d432f72a9831ea76eff
