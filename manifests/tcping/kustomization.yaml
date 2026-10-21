@@ -17,7 +17,7 @@ generatorOptions:
 images:
 - name: ghcr.io/albertycl/tcping-backend
   newName: ghcr.io/albertycl/tcping-backend
-  newTag: 9b7ec8a9d42954fc55c47a14ef3c76137d554443
+  newTag: 17fde35daa6a8382dfce5b38bdc01f55a20ef2f7
 - name: ghcr.io/albertycl/tcping-frontend
   newName: ghcr.io/albertycl/tcping-frontend
-  newTag: 9b7ec8a9d42954fc55c47a14ef3c76137d554443
+  newTag: 17fde35daa6a8382dfce5b38bdc01f55a20ef2f7
